@@ -1,4 +1,4 @@
-class patients {
+class Student {
   final String firstName;
   final String lastName;
   final String dob;
@@ -14,7 +14,7 @@ class patients {
   final String universalId;
   final String bloodGroup;
 
-  patients({
+  Student({
     required this.firstName,
     required this.lastName,
     required this.dob,
@@ -31,8 +31,8 @@ class patients {
     required this.bloodGroup,
   });
 
-  factory patients.fromJson(Map<String, dynamic> json) {
-    return patients(
+  factory Student.fromJson(Map<String, dynamic> json) {
+    return Student(
       firstName: json['first_name'],
       lastName: json['last_name'],
       dob: json['dob'],

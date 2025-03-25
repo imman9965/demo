@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../models/auth_response.dart';
-import '../models/patients_response.dart';
-import '../models/patient_model.dart';
+import '../models/student.dart';
+import '../models/track.dart';
 import '../services/api_services.dart';
 import '../services/secure_storage.dart';
 
@@ -12,9 +12,9 @@ class Controller extends GetxController {
 
   var isLoading = false.obs;
   var authResponse = Rxn<Auth>();
-  var patientData = Rxn<patients>();
-  var states = <Stat>[].obs;
-  var selectedStateId = Rxn<int>();
+  var student = Rxn<Student>();
+  var select = <Stat>[].obs;
+  var selectedId = Rxn<int>();
 
   Future<bool> login(String email, String password) async {
     try {
@@ -25,6 +25,14 @@ class Controller extends GetxController {
         authResponse.value = response;
         await secureStorage.add('token', response.stok);
         await secureStorage.add('uid', response.uid.toString());
+        // await secureStorage.add('id', response.uid.toString());
+        await secureStorage.add('name', response.roles[0].name.toString());
+        await secureStorage.add('id', response.roles[0].id.toString());
+
+
+
+
+
         await getPatientData();
         await getStates();
         Get.offAllNamed('/home');
@@ -49,10 +57,14 @@ class Controller extends GetxController {
       isLoading.value = true;
       final token = await secureStorage.get('token');
       final patient = await apiService.getPatientData(authResponse.value!.uid, token);
+      var k = await secureStorage.get('name');
+      print(k.toString()+"nskj");
+
+
 
       if (patient != null) {
-        patientData.value = patient;
-        selectedStateId.value = int.tryParse(patient.state);
+        student.value = patient;
+        selectedId.value = int.tryParse(patient.state);
       } else {
         debugPrint('No patient data received');
       }
@@ -73,7 +85,7 @@ class Controller extends GetxController {
     try {
       isLoading.value = true;
       final token = await secureStorage.get('token');
-      states.value = await apiService.getStates(token);
+      select.value = await apiService.getStates(token);
     } catch (e) {
       debugPrint('Get states error: $e');
       if (e.toString().contains('Token expired')) {
@@ -87,14 +99,14 @@ class Controller extends GetxController {
     }
   }
 
-  Future<bool> updatePatientData(patients patient) async {
+  Future<bool> updatePatientData(Student patient) async {
     try {
       isLoading.value = true;
       final token = await secureStorage.get('token');
       final success = await apiService.updatePatientData(patient, token);
 
       if (success) {
-        patientData.value = patient;
+        student.value = patient;
         Get.snackbar('Success', 'Profile updated successfully');
         return true;
       }
@@ -116,9 +128,9 @@ class Controller extends GetxController {
 
   void logout() {
     authResponse.value = null;
-    patientData.value = null;
-    states.clear();
-    selectedStateId.value = null;
+    student.value = null;
+    select.clear();
+    selectedId.value = null;
     secureStorage.delete('token');
     secureStorage.delete('uid');
     Get.offAllNamed('/login');
@@ -136,6 +148,10 @@ class Controller extends GetxController {
       isLoading.value = true;
       final token = await secureStorage.get('token');
       final uid = await secureStorage.get('uid');
+      final name = await secureStorage.get('name');
+      final id = await secureStorage.get('id');
+
+
       if (token.isNotEmpty && uid.isNotEmpty) {
         final isValidToken = await apiService.validateToken(token,uid);
         if (isValidToken) {
@@ -143,12 +159,12 @@ class Controller extends GetxController {
             auth: true,
             stok: token,
             uid: int.parse(uid),
-            roles: [Role(id: 4, name: 'patient')],
+            roles: [Role(id: int.parse(id), name: name)],
             passwordReset: false,
             message: 'Auto-login successful',
           );
           await getPatientData();
-          if (patientData.value != null) {
+          if (student.value != null) {
             await getStates();
             Get.offAllNamed('/home');
             debugPrint('Auto-login successful, navigated to home');

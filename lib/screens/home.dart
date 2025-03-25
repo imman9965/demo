@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/controller.dart';
-import '../models/patient_model.dart';
+import '../models/track.dart';
 import '../widget/custom_button.dart';
-import '../models/patients_response.dart';
+import '../models/student.dart';
 import '../widget/CustomTextField.dart';
 import '../widget/custom_dropdown.dart';
 import '../widget/date_field.dart';
@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
             () =>
                 ctrl.isLoading.value
                     ? const Center(child: CircularProgressIndicator())
-                    : ctrl.patientData.value == null
+                    : ctrl.student.value == null
                     ? const Center(child: Text('No patient data'))
                     : SingleChildScrollView(
                       padding: const EdgeInsets.all(16.0),
@@ -66,10 +66,10 @@ class HomeScreen extends StatelessWidget {
                             labelText: 'City',
                           ),
                           CustomDropdown(
-                            states: ctrl.states,
-                            selectedStateId: ctrl.selectedStateId,
+                            states: ctrl.select,
+                            selectedStateId: ctrl.selectedId,
                             onChanged:
-                                (value) => ctrl.selectedStateId.value = value,
+                                (value) => ctrl.selectedId.value = value,
                           ),
                           const SizedBox(height: 8),
                           CustomTextField(
@@ -80,7 +80,7 @@ class HomeScreen extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: Text(
-                              'Email: ${ctrl.patientData.value!.emailId}',
+                              'Email: ${ctrl.student.value!.emailId}',
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -99,11 +99,11 @@ class HomeScreen extends StatelessWidget {
 
   // Helper method to initialize controllers
   Widget initializeControllers(Controller ctrl) {
-    firstNameController.text = ctrl.patientData.value!.firstName;
-    lastNameController.text = ctrl.patientData.value!.lastName;
-    cityController.text = ctrl.patientData.value!.cityN;
-    contactController.text = ctrl.patientData.value!.contactNo;
-    dobController.text = ctrl.patientData.value!.dob.split('T')[0];
+    firstNameController.text = ctrl.student.value!.firstName;
+    lastNameController.text = ctrl.student.value!.lastName;
+    cityController.text = ctrl.student.value!.cityN;
+    contactController.text = ctrl.student.value!.contactNo;
+    dobController.text = ctrl.student.value!.dob.split('T')[0];
     return const SizedBox.shrink();
   }
 
@@ -117,23 +117,23 @@ class HomeScreen extends StatelessWidget {
       Get.snackbar('Error', 'Invalid date format (use YYYY-MM-DD)');
       return;
     }
-    if (ctrl.selectedStateId.value == null) {
+    if (ctrl.selectedId.value == null) {
       Get.snackbar('Error', 'Please select a state');
       return;
     }
 
-    final updatedPatient = patients(
+    final updatedPatient = Student(
       firstName: firstNameController.text,
       lastName: lastNameController.text,
       dob: dobController.text,
       cityN: cityController.text,
-      state: ctrl.selectedStateId.value.toString(),
+      state: ctrl.selectedId.value.toString(),
       contactNo: contactController.text,
-      emailId: ctrl.patientData.value!.emailId,
-      pid: ctrl.patientData.value!.pid,
-      gender: ctrl.patientData.value!.gender,
-      universalId: ctrl.patientData.value!.universalId,
-      bloodGroup: ctrl.patientData.value!.bloodGroup,
+      emailId: ctrl.student.value!.emailId,
+      pid: ctrl.student.value!.pid,
+      gender: ctrl.student.value!.gender,
+      universalId: ctrl.student.value!.universalId,
+      bloodGroup: ctrl.student.value!.bloodGroup,
     );
 
     await ctrl.updatePatientData(updatedPatient);

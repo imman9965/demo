@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/auth_response.dart';
-import '../models/patient_model.dart';
-import '../models/patients_response.dart';
+import '../models/track.dart';
+import '../models/student.dart';
 import 'api_endpoint.dart';
 
 class ApiService {
@@ -30,7 +30,7 @@ class ApiService {
     }
   }
 
-  Future<patients?> getPatientData(int uid, String token) async {
+  Future<Student?> getPatientData(int uid, String token) async {
     try {
       final response = await http.get(
         Uri.parse('${ApiConstants.baseUrl}${ApiConstants.patientUrl}/$uid'),
@@ -41,7 +41,7 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        return patients.fromJson(jsonDecode(response.body));
+        return Student.fromJson(jsonDecode(response.body));
       }
       return null;
     } catch (e) {
@@ -49,7 +49,7 @@ class ApiService {
     }
   }
 
-  Future<bool> updatePatientData(patients patient, String token) async {
+  Future<bool> updatePatientData(Student patient, String token) async {
     try {
       final response = await http.put(
         Uri.parse('${ApiConstants.baseUrl}${ApiConstants.patientUrl}/${patient.pid}'),
